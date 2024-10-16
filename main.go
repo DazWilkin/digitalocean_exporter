@@ -33,11 +33,13 @@ var (
 
 // Config gets its content from env and passes it on to different packages
 type Config struct {
-	Debug             bool   `arg:"env:DEBUG"`
-	DigitalOceanToken string `arg:"env:DIGITALOCEAN_TOKEN"`
-	HTTPTimeout       int    `arg:"env:HTTP_TIMEOUT"`
-	WebAddr           string `arg:"env:WEB_ADDR"`
-	WebPath           string `arg:"env:WEB_PATH"`
+	Debug                 bool   `arg:"env:DEBUG"`
+	DigitalOceanToken     string `arg:"env:DIGITALOCEAN_TOKEN"`
+	SpacesAccessKeyID     string `arg:"env:DIGITALOCEAN_SPACES_ACCESS_KEY_ID"`
+	SpacesAccessKeySecret string `arg:"env:DIGITALOCEAN_SPACES_ACCESS_KEY_SECRET"`
+	HTTPTimeout           int    `arg:"env:HTTP_TIMEOUT"`
+	WebAddr               string `arg:"env:WEB_ADDR"`
+	WebPath               string `arg:"env:WEB_PATH"`
 }
 
 // Token returns a token or an error.
@@ -79,6 +81,12 @@ func main() {
 		"goVersion", GoVersion,
 	)
 
+	if c.SpacesAccessKeyID == "" && c.SpacesAccessKeySecret == "" {
+		level.Warn(logger).Log(
+			"msg", "Spaces Access Key ID and Secret unset. Spaces buckets will not be collected",
+		)
+	}
+
 	oauthClient := oauth2.NewClient(context.TODO(), c)
 	client := godo.NewClient(oauthClient)
 
@@ -94,8 +102,10 @@ func main() {
 	r.MustRegister(prometheus.NewGoCollector())
 	r.MustRegister(errors)
 	r.MustRegister(collector.NewExporterCollector(logger, Version, Revision, BuildDate, GoVersion, StartTime))
-
 	r.MustRegister(collector.NewAccountCollector(logger, errors, client, timeout))
+	r.MustRegister(collector.NewAppCollector(logger, errors, client, timeout))
+	r.MustRegister(collector.NewBalanceCollector(logger, errors, client, timeout))
+	r.MustRegister(collector.NewDBCollector(logger, errors, client, timeout))
 	r.MustRegister(collector.NewDomainCollector(logger, errors, client, timeout))
 	r.MustRegister(collector.NewDropletCollector(logger, errors, client, timeout))
 	r.MustRegister(collector.NewFloatingIPCollector(logger, errors, client, timeout))
@@ -104,6 +114,13 @@ func main() {
 	r.MustRegister(collector.NewLoadBalancerCollector(logger, errors, client, timeout))
 	r.MustRegister(collector.NewSnapshotCollector(logger, errors, client, timeout))
 	r.MustRegister(collector.NewVolumeCollector(logger, errors, client, timeout))
+	r.MustRegister(collector.NewKubernetesCollector(logger, errors, client, timeout))
+	r.MustRegister(collector.NewIncidentCollector(logger, errors, timeout))
+
+	// Only run spaces bucket collector if access key id and secret are set
+	if c.SpacesAccessKeyID != "" && c.SpacesAccessKeySecret != "" {
+		r.MustRegister(collector.NewSpacesCollector(logger, errors, client, c.SpacesAccessKeyID, c.SpacesAccessKeySecret, timeout))
+	}
 
 	http.Handle(c.WebPath,
 		promhttp.HandlerFor(r, promhttp.HandlerOpts{}),
