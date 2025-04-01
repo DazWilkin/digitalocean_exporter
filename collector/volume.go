@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/digitalocean/godo"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -52,6 +52,7 @@ func (c *VolumeCollector) Collect(ch chan<- prometheus.Metric) {
 	volumes, _, err := c.client.Storage.ListVolumes(ctx, nil)
 	if err != nil {
 		c.errors.WithLabelValues("volume").Add(1)
+		// nolint:errcheck
 		level.Warn(c.logger).Log(
 			"msg", "can't list volumes",
 			"err", err,

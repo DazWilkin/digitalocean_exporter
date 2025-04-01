@@ -9,11 +9,12 @@ import (
 
 	arg "github.com/alexflint/go-arg"
 	"github.com/digitalocean/godo"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/joho/godotenv"
 	"github.com/metalmatze/digitalocean_exporter/collector"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"golang.org/x/oauth2"
 )
@@ -73,6 +74,7 @@ func main() {
 		"caller", log.DefaultCaller,
 	)
 
+	// nolint:errcheck
 	level.Info(logger).Log(
 		"msg", "starting digitalocean_exporter",
 		"version", Version,
@@ -82,6 +84,7 @@ func main() {
 	)
 
 	if c.SpacesAccessKeyID == "" && c.SpacesAccessKeySecret == "" {
+		// nolint:errcheck
 		level.Warn(logger).Log(
 			"msg", "Spaces Access Key ID and Secret unset. Spaces buckets will not be collected",
 		)
@@ -98,8 +101,8 @@ func main() {
 	}, []string{"collector"})
 
 	r := prometheus.NewRegistry()
-	r.MustRegister(prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}))
-	r.MustRegister(prometheus.NewGoCollector())
+	r.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
+	r.MustRegister(collectors.NewGoCollector())
 	r.MustRegister(errors)
 	r.MustRegister(collector.NewExporterCollector(logger, Version, Revision, BuildDate, GoVersion, StartTime))
 	r.MustRegister(collector.NewAccountCollector(logger, errors, client, timeout))
@@ -136,8 +139,10 @@ func main() {
 			</html>`))
 	})
 
+	// nolint:errcheck
 	level.Info(logger).Log("msg", "listening", "addr", c.WebAddr)
 	if err := http.ListenAndServe(c.WebAddr, nil); err != nil {
+		// nolint:errcheck
 		level.Error(logger).Log("msg", "http listenandserve error", "err", err)
 		os.Exit(1)
 	}

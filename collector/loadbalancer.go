@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/digitalocean/godo"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -61,6 +61,7 @@ func (c *LoadBalancerCollector) Collect(ch chan<- prometheus.Metric) {
 	lbs, _, err := c.client.LoadBalancers.List(ctx, nil)
 	if err != nil {
 		c.errors.WithLabelValues("loadbalancer").Add(1)
+		// nolint:errcheck
 		level.Warn(c.logger).Log(
 			"msg", "can't list loadbalancers",
 			"err", err,

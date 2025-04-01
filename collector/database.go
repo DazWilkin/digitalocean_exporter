@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/digitalocean/godo"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -78,6 +78,7 @@ func (c *DBCollector) Collect(ch chan<- prometheus.Metric) {
 		dbPage, resp, err := c.client.Databases.List(ctx, opt)
 		if err != nil {
 			c.errors.WithLabelValues("database").Add(1)
+			// nolint:errcheck
 			level.Warn(c.logger).Log(
 				"msg", "can't list databases",
 				"err", err,
@@ -86,9 +87,7 @@ func (c *DBCollector) Collect(ch chan<- prometheus.Metric) {
 		}
 
 		// append the current page's dbs to our list
-		for _, d := range dbPage {
-			dbs = append(dbs, d)
-		}
+		dbs = append(dbs, dbPage...)
 
 		// if we are at the last page, break out the for loop
 		if resp.Links == nil || resp.Links.IsLastPage() {
@@ -98,6 +97,7 @@ func (c *DBCollector) Collect(ch chan<- prometheus.Metric) {
 		page, err := resp.Links.CurrentPage()
 		if err != nil {
 			c.errors.WithLabelValues("database").Add(1)
+			// nolint:errcheck
 			level.Warn(c.logger).Log(
 				"msg", "can't read current page",
 				"err", err,

@@ -8,14 +8,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 const doStatusAPIURL = "https://status.digitalocean.com/api/v2/summary.json"
 
-var regionRegex = regexp.MustCompile("[A-Z]{3}\\d{1}")
+var regionRegex = regexp.MustCompile(`[A-Z]{3}\d{1}`)
 
 // DOIncidentAPIResponse stores active digitalocean incidents with their Name(title) to extract the region name
 type DOIncidentAPIResponse struct {
@@ -69,7 +69,7 @@ func GetIncidents(client *http.Client) (DOIncidentAPIResponse, error) {
 	if err != nil {
 		return DOIncidentAPIResponse{}, err
 	}
-	defer r.Body.Close()
+	defer r.Body.Close() // nolint:errcheck
 
 	if r.StatusCode != http.StatusOK {
 		return DOIncidentAPIResponse{}, fmt.Errorf("unable to retrieve incidents: %w", err)
@@ -101,6 +101,7 @@ func (c *IncidentCollector) Collect(ch chan<- prometheus.Metric) {
 	doStatus, err := GetIncidents(&client)
 	if err != nil {
 		c.errors.WithLabelValues("incidents").Add(1)
+		// nolint:errcheck
 		level.Warn(c.logger).Log(
 			"msg", "can't retrieve incidents",
 			"err", err,
@@ -112,13 +113,7 @@ func (c *IncidentCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, incident := range doStatus.Incidents {
 		// Extract region name from incident title(if present)
 		region := parseRegion(incident.Name)
-		if _, ok := regionalIncidents[region]; ok {
-			// If key is present, increment
-			regionalIncidents[region]++
-		} else {
-			// If key is not present, create with initial value of 1
-			regionalIncidents[region] = 1
-		}
+		regionalIncidents[region]++
 	}
 
 	// Create metric per region

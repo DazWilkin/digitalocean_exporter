@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/digitalocean/godo"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -58,6 +58,7 @@ func (c *SnapshotCollector) Collect(ch chan<- prometheus.Metric) {
 	snapshots, _, err := c.client.Snapshots.List(ctx, nil)
 	if err != nil {
 		c.errors.WithLabelValues("snapshot").Add(1)
+		// nolint:errcheck
 		level.Warn(c.logger).Log(
 			"msg", "can't list snapshots",
 			"err", err,

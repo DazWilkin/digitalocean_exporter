@@ -3,8 +3,8 @@ package collector
 import (
 	"time"
 
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -55,6 +55,7 @@ func (c *ExporterCollector) Describe(ch chan<- *prometheus.Desc) {
 
 // Collect is called by the Prometheus registry when collecting metrics.
 func (c *ExporterCollector) Collect(ch chan<- prometheus.Metric) {
+	// nolint:errcheck
 	level.Debug(c.logger).Log(
 		"starttime", c.startTime.Unix(),
 		"version", c.version,

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/digitalocean/godo"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -73,6 +73,7 @@ func (c *BalanceCollector) Collect(ch chan<- prometheus.Metric) {
 	bal, _, err := c.client.Balance.Get(ctx)
 	if err != nil {
 		c.errors.WithLabelValues("balance").Add(1)
+		// nolint:errcheck
 		level.Warn(c.logger).Log(
 			"msg", "can't get balance",
 			"err", err,
@@ -83,6 +84,7 @@ func (c *BalanceCollector) Collect(ch chan<- prometheus.Metric) {
 	monthToDateBalance, err := strconv.ParseFloat(bal.MonthToDateBalance, 64)
 	if err != nil {
 		c.errors.WithLabelValues("balance").Add(1)
+		// nolint:errcheck
 		level.Warn(c.logger).Log(
 			"msg", "can't parse MonthToDateBalance",
 			"err", err,
@@ -97,6 +99,7 @@ func (c *BalanceCollector) Collect(ch chan<- prometheus.Metric) {
 	accountBalance, err := strconv.ParseFloat(bal.AccountBalance, 64)
 	if err != nil {
 		c.errors.WithLabelValues("balance").Add(1)
+		// nolint:errcheck
 		level.Warn(c.logger).Log(
 			"msg", "can't parse AccountBalance",
 			"err", err,
@@ -111,6 +114,7 @@ func (c *BalanceCollector) Collect(ch chan<- prometheus.Metric) {
 	monthToDateUsage, err := strconv.ParseFloat(bal.MonthToDateUsage, 64)
 	if err != nil {
 		c.errors.WithLabelValues("balance").Add(1)
+		// nolint:errcheck
 		level.Warn(c.logger).Log(
 			"msg", "can't parse MonthToDateUsage",
 			"err", err,

@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/digitalocean/godo"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -60,6 +60,7 @@ func (c *AppCollector) Collect(ch chan<- prometheus.Metric) {
 		appsPage, resp, err := c.client.Apps.List(ctx, opt)
 		if err != nil {
 			c.errors.WithLabelValues("app").Add(1)
+			// nolint:errcheck
 			level.Warn(c.logger).Log(
 				"msg", "can't list apps",
 				"err", err,
@@ -80,6 +81,7 @@ func (c *AppCollector) Collect(ch chan<- prometheus.Metric) {
 		page, err := resp.Links.CurrentPage()
 		if err != nil {
 			c.errors.WithLabelValues("app").Add(1)
+			// nolint:errcheck
 			level.Warn(c.logger).Log(
 				"msg", "can't read current page",
 				"err", err,

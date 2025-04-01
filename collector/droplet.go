@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/digitalocean/godo"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -94,6 +94,7 @@ func (c *DropletCollector) Collect(ch chan<- prometheus.Metric) {
 
 	for {
 		dropletsPage, resp, err := c.client.Droplets.List(ctx, opt)
+		// nolint:errcheck
 		if err != nil {
 			c.errors.WithLabelValues("droplet").Add(1)
 			level.Warn(c.logger).Log(
@@ -104,9 +105,7 @@ func (c *DropletCollector) Collect(ch chan<- prometheus.Metric) {
 		}
 
 		// append the current page's droplets to our list
-		for _, d := range dropletsPage {
-			droplets = append(droplets, d)
-		}
+		droplets = append(droplets, dropletsPage...)
 
 		// if we are at the last page, break out the for loop
 		if resp.Links == nil || resp.Links.IsLastPage() {
@@ -116,6 +115,7 @@ func (c *DropletCollector) Collect(ch chan<- prometheus.Metric) {
 		page, err := resp.Links.CurrentPage()
 		if err != nil {
 			c.errors.WithLabelValues("droplet").Add(1)
+			// nolint:errcheck
 			level.Warn(c.logger).Log(
 				"msg", "can't read current page",
 				"err", err,

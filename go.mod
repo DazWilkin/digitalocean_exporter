@@ -5,7 +5,7 @@ go 1.24
 require (
 	github.com/alexflint/go-arg v1.5.1
 	github.com/digitalocean/godo v1.138.0
-	github.com/go-kit/kit v0.13.0
+	github.com/go-kit/log v0.2.1
 	github.com/joho/godotenv v1.5.1
 	github.com/minio/minio-go/v7 v7.0.87
 	github.com/prometheus/client_golang v1.21.1
@@ -18,7 +18,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
-	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
