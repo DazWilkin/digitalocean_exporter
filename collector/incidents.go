@@ -13,7 +13,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-const doStatusAPIURL = "https://s2k7tnzlhrpw.statuspage.io/api/v2/summary.json"
+const doStatusAPIURL = "https://status.digitalocean.com/api/v2/summary.json"
 
 var regionRegex = regexp.MustCompile("[A-Z]{3}\\d{1}")
 
@@ -105,7 +105,9 @@ func (c *IncidentCollector) Collect(ch chan<- prometheus.Metric) {
 			"msg", "can't retrieve incidents",
 			"err", err,
 		)
+		return
 	}
+
 	// Count all incidents per region
 	for _, incident := range doStatus.Incidents {
 		// Extract region name from incident title(if present)

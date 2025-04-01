@@ -64,6 +64,7 @@ func (c *AppCollector) Collect(ch chan<- prometheus.Metric) {
 				"msg", "can't list apps",
 				"err", err,
 			)
+			break
 		}
 
 		// append the current page's apps to our list
@@ -83,6 +84,7 @@ func (c *AppCollector) Collect(ch chan<- prometheus.Metric) {
 				"msg", "can't read current page",
 				"err", err,
 			)
+			break
 		}
 
 		opt.Page = page + 1

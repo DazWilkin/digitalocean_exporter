@@ -100,7 +100,7 @@ func (c *DropletCollector) Collect(ch chan<- prometheus.Metric) {
 				"msg", "can't list droplets",
 				"err", err,
 			)
-			return
+			break
 		}
 
 		// append the current page's droplets to our list
@@ -120,6 +120,7 @@ func (c *DropletCollector) Collect(ch chan<- prometheus.Metric) {
 				"msg", "can't read current page",
 				"err", err,
 			)
+			break
 		}
 
 		opt.Page = page + 1

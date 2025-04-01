@@ -57,6 +57,7 @@ func (c *KeyCollector) Collect(ch chan<- prometheus.Metric) {
 			"msg", "can't list keys",
 			"err", err,
 		)
+		return
 	}
 
 	for _, key := range keys {

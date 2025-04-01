@@ -65,6 +65,7 @@ func (c *LoadBalancerCollector) Collect(ch chan<- prometheus.Metric) {
 			"msg", "can't list loadbalancers",
 			"err", err,
 		)
+		return
 	}
 
 	for _, lb := range lbs {

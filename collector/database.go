@@ -82,6 +82,7 @@ func (c *DBCollector) Collect(ch chan<- prometheus.Metric) {
 				"msg", "can't list databases",
 				"err", err,
 			)
+			break
 		}
 
 		// append the current page's dbs to our list
@@ -101,6 +102,7 @@ func (c *DBCollector) Collect(ch chan<- prometheus.Metric) {
 				"msg", "can't read current page",
 				"err", err,
 			)
+			break
 		}
 
 		opt.Page = page + 1

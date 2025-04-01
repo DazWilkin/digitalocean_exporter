@@ -71,6 +71,7 @@ func (c *KubernetesCollector) Collect(ch chan<- prometheus.Metric) {
 			"msg", "can't list clusters",
 			"err", err,
 		)
+		return
 	}
 
 	for _, cluster := range clusters {
