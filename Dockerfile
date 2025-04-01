@@ -1,39 +1,31 @@
-# https://hub.docker.com/_/alpine/tags
-ARG ALPINE_VERSION="3.21"
+ARG GOLANG_VERSION="1.24"
 
-# https://pkgs.alpinelinux.org/package/edge/main/x86/ca-certificates
-ARG CACERT_VERSION="20241121-r1"
+ARG TARGETOS
+ARG TARGETARCH
 
-# https://hub.docker.com/_/golang/tags
-ARG GOLANG_VERSION="1.24-alpine${ALPINE_VERSION}"
-
-ARG GOOS="linux"
-ARG GOARCH="amd64"
-
-FROM docker.io/golang:${GOLANG_VERSION} as build
+FROM --platform=${TARGETARCH} docker.io/golang:${GOLANG_VERSION} as build
 
 COPY go.* ./
 COPY main.go ./
 COPY collector ./collector
 
-ARG GOOS
-ARG GOARCH
+ARG TARGETOS
+ARG TARGETARCH
 
-RUN CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} \
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build \
     -a -installsuffix cgo \
     -o /go/bin/digitalocean_exporter \
     ./main.go
 
 
-FROM docker.io/alpine:${ALPINE_VERSION}
+FROM --platform=${TARGETARCH} gcr.io/distroless/static-debian12:latest
 
-ARG CACERT_VERSION
+LABEL org.opencontainers.image.description="Prometheus Exporter for DigitalOcean"
+LABEL org.opencontainers.image.source="https://github.com/DazWilkin/digitalocean_exporter"
 
-RUN apk add --no-cache ca-certificates=${CACERT_VERSION}
-
-COPY --from=build /go/bin/digitalocean_exporter /usr/bin/digitalocean_exporter
+COPY --from=build /go/bin/digitalocean_exporter /digitalocean_exporter
 
 EXPOSE 9212
 
-ENTRYPOINT ["/usr/bin/digitalocean_exporter"]
+ENTRYPOINT ["/digitalocean_exporter"]
