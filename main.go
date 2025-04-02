@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"text/template"
 	"time"
 
 	arg "github.com/alexflint/go-arg"
@@ -17,6 +18,29 @@ import (
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"golang.org/x/oauth2"
+)
+
+const (
+	rootTemplate = `
+{{- define "content" }}
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+	<meta charset="utf-8">
+	<title>DigitalOcean Exporter</title>
+	<style>
+	body {
+  		font-family: Verdana;
+	}
+	</style>
+</head>
+<body>
+	<h2>DigitalOcean Exporter</h2>
+	<li><a href="{{ .MetricsPath }}">metrics</a></li>
+	<li><a href="/healthz">healthz</a></li>
+</body>
+</html>
+{{- end }}`
 )
 
 var (
@@ -46,6 +70,11 @@ type Config struct {
 // Token returns a token or an error.
 func (c Config) Token() (*oauth2.Token, error) {
 	return &oauth2.Token{AccessToken: c.DigitalOceanToken}, nil
+}
+
+// Content is used by the root handler's tempalte
+type Content struct {
+	MetricsPath string
 }
 
 func main() {
@@ -130,13 +159,20 @@ func main() {
 	)
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte(`<html>
-			<head><title>DigitalOcean Exporter</title></head>
-			<body>
-			<h1>DigitalOcean Exporter</h1>
-			<p><a href="` + c.WebPath + `">Metrics</a></p>
-			</body>
-			</html>`))
+		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
+		t := template.Must(template.New("content").Parse(rootTemplate))
+		if err := t.ExecuteTemplate(w, "content", Content{MetricsPath: c.WebPath}); err != nil {
+			// nolint:errcheck
+			level.Error(logger).Log("msg", "unable to execute template", err)
+		}
+	})
+	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+		if _, err := w.Write([]byte("ok")); err != nil {
+			// nolint:errcheck
+			level.Error(logger).Log("msg", "unable to write response", err)
+		}
 	})
 
 	// nolint:errcheck
