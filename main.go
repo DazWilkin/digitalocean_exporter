@@ -120,7 +120,26 @@ func main() {
 	}
 
 	oauthClient := oauth2.NewClient(context.TODO(), c)
-	client := godo.NewClient(oauthClient)
+
+	// Automatic Retries and Exponential Backoff
+	// https://github.com/digitalocean/godo?tab=readme-ov-file#automatic-retries-and-exponential-backoff
+	waitMax := godo.PtrTo(6.0)
+	waitMin := godo.PtrTo(3.0)
+
+	retryConfig := godo.RetryConfig{
+		RetryMax:     3,
+		RetryWaitMin: waitMin,
+		RetryWaitMax: waitMax,
+	}
+
+	client, err := godo.New(oauthClient, godo.WithRetryAndBackoffs(retryConfig))
+	if err != nil {
+		level.Error(logger).Log(
+			"msg", "unable to create DigitalOcean API instance",
+			"err", err,
+		)
+		os.Exit(1)
+	}
 
 	timeout := time.Duration(c.HTTPTimeout) * time.Millisecond
 
