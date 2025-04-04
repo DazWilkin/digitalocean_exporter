@@ -13,6 +13,9 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/joho/godotenv"
+
+	"github.com/metalmatze/digitalocean_exporter/errlimit"
+
 	"github.com/metalmatze/digitalocean_exporter/collector"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
@@ -136,13 +139,14 @@ func main() {
 	if err != nil {
 		level.Error(logger).Log(
 			"msg", "unable to create DigitalOcean API instance",
-			"err", err,
+			"err", errlimit.Error(err),
 		)
 		os.Exit(1)
 	}
 
 	timeout := time.Duration(c.HTTPTimeout) * time.Millisecond
 
+	// Used to accumulate errors by controller
 	errors := prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: "digitalocean_errors_total",
 		Help: "The total number of errors per collector",
@@ -151,7 +155,10 @@ func main() {
 	r := prometheus.NewRegistry()
 	r.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
 	r.MustRegister(collectors.NewGoCollector())
+
+	// Register the controller errors accumulator
 	r.MustRegister(errors)
+
 	r.MustRegister(collector.NewExporterCollector(logger, Version, Revision, BuildDate, GoVersion, StartTime))
 	r.MustRegister(collector.NewAccountCollector(logger, errors, client, timeout))
 	r.MustRegister(collector.NewAppCollector(logger, errors, client, timeout))

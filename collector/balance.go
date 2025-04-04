@@ -8,6 +8,7 @@ import (
 	"github.com/digitalocean/godo"
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
+	"github.com/metalmatze/digitalocean_exporter/errlimit"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -76,7 +77,7 @@ func (c *BalanceCollector) Collect(ch chan<- prometheus.Metric) {
 		// nolint:errcheck
 		level.Warn(c.logger).Log(
 			"msg", "can't get balance",
-			"err", err,
+			"err", errlimit.Error(err),
 		)
 		return
 	}
@@ -87,7 +88,7 @@ func (c *BalanceCollector) Collect(ch chan<- prometheus.Metric) {
 		// nolint:errcheck
 		level.Warn(c.logger).Log(
 			"msg", "can't parse MonthToDateBalance",
-			"err", err,
+			"err", errlimit.Error(err),
 		)
 		monthToDateBalance = -1
 	}
@@ -102,7 +103,7 @@ func (c *BalanceCollector) Collect(ch chan<- prometheus.Metric) {
 		// nolint:errcheck
 		level.Warn(c.logger).Log(
 			"msg", "can't parse AccountBalance",
-			"err", err,
+			"err", errlimit.Error(err),
 		)
 		accountBalance = -1
 	}
@@ -117,7 +118,7 @@ func (c *BalanceCollector) Collect(ch chan<- prometheus.Metric) {
 		// nolint:errcheck
 		level.Warn(c.logger).Log(
 			"msg", "can't parse MonthToDateUsage",
-			"err", err,
+			"err", errlimit.Error(err),
 		)
 		monthToDateUsage = -1
 	}

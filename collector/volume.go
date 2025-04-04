@@ -7,6 +7,7 @@ import (
 	"github.com/digitalocean/godo"
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
+	"github.com/metalmatze/digitalocean_exporter/errlimit"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -55,7 +56,7 @@ func (c *VolumeCollector) Collect(ch chan<- prometheus.Metric) {
 		// nolint:errcheck
 		level.Warn(c.logger).Log(
 			"msg", "can't list volumes",
-			"err", err,
+			"err", errlimit.Error(err),
 		)
 		return
 	}

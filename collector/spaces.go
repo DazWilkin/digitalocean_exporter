@@ -11,6 +11,7 @@ import (
 	"github.com/digitalocean/godo"
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
+	"github.com/metalmatze/digitalocean_exporter/errlimit"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/prometheus/client_golang/prometheus"
@@ -73,7 +74,7 @@ func (c *SpacesCollector) Collect(ch chan<- prometheus.Metric) {
 		// nolint:errcheck
 		level.Warn(c.logger).Log(
 			"msg", "can't list regions",
-			"err", err,
+			"err", errlimit.Error(err),
 		)
 		return
 	}
@@ -97,7 +98,7 @@ func (c *SpacesCollector) Collect(ch chan<- prometheus.Metric) {
 				// nolint:errcheck
 				level.Warn(c.logger).Log(
 					"msg", "can't create minio client",
-					"err", err,
+					"err", errlimit.Error(err),
 				)
 				return
 			}
@@ -115,7 +116,7 @@ func (c *SpacesCollector) Collect(ch chan<- prometheus.Metric) {
 				// nolint:errcheck
 				level.Warn(c.logger).Log(
 					"msg", "can't list spaces buckets",
-					"err", err,
+					"err", errlimit.Error(err),
 				)
 				return
 			}
