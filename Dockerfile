@@ -8,6 +8,7 @@ FROM --platform=${TARGETARCH} docker.io/golang:${GOLANG_VERSION} as build
 COPY go.* ./
 COPY main.go ./
 COPY collector ./collector
+COPY errlimit ./errlimit 
 
 ARG TARGETOS
 ARG TARGETARCH
