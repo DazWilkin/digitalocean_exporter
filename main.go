@@ -137,6 +137,7 @@ func main() {
 
 	client, err := godo.New(oauthClient, godo.WithRetryAndBackoffs(retryConfig))
 	if err != nil {
+		// nolint:errcheck
 		level.Error(logger).Log(
 			"msg", "unable to create DigitalOcean API instance",
 			"err", errlimit.Error(err),
