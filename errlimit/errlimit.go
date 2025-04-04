@@ -6,6 +6,7 @@
 
 package errlimit
 
+// Error is a function that trims extensively DigitalOcean API call error messages
 func Error(err error) string {
 	if err == nil {
 		return ""
