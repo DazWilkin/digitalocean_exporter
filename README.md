@@ -4,5 +4,5 @@
 
 Forks: [metalmatze/digitalocean_exporter](https://github.com/metalmatze/digitalocean_exporter) with thanks!
 
-`ghcr.io/dazwilkin/digitalocean_exporter:6da3d20363118389c6805d85141233757e0458a8`
+`ghcr.io/dazwilkin/digitalocean_exporter:e3b4f773f401c7b42d147a62534307cd0f1276d6`
 

@@ -43,7 +43,7 @@ services:
       - 9093:9093
 
   digitalocean-exporter:
-    image: ghcr.io/dazwilkin/digitalocean_exporter:6da3d20363118389c6805d85141233757e0458a8
+    image: ghcr.io/dazwilkin/digitalocean_exporter:e3b4f773f401c7b42d147a62534307cd0f1276d6
     container_name: digitalocean-exporter
     environment:
       - DIGITALOCEAN_TOKEN
